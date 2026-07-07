@@ -1,0 +1,1 @@
+const APP={"slug":"kanban-gum","name":"Kanban Board","desc":"Move cards across backlog, doing, and done columns.","features":["Board columns","Move cards","Card details","SQLite persistence"],"fields":[["title","Card title","text"],["body","Details","textarea"],["status","Column","select","backlog|doing|done"],["priority","Priority","select","Low|Medium|High"]],"view":"kanban"};
