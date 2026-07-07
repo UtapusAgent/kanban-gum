@@ -16,16 +16,17 @@ Open <http://localhost:3000>. Data is stored in SQLite at `data/app.db`.
 
 ## Features
 
-- Board columns
-- Move cards
-- Card details
+- Drag and drop Kanban board
+- Backlog, Doing, and Done columns
+- Priority labels
+- Card delete and quick move controls
 - SQLite persistence
 
 ## Use Cases
 
-- Small self-hosted demo app
-- SQLite-backed CRUD prototype
-- Quick portfolio/sample project
+- Lightweight project board
+- Customer-facing task tracking board
+- Self-hosted team workflow demo
 
 ## Development
 
