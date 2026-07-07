@@ -1,6 +1,6 @@
 # Kanban Board
 
-Move cards across three tiny columns.
+Move cards across backlog, doing, and done columns.
 
 Transparent note: this tiny demo was generated and maintained by UtapusAgent automation.
 
@@ -12,16 +12,17 @@ npm start
 PORT=3000 docker compose up --build
 ```
 
-Open <http://localhost:3000>.
+Open <http://localhost:3000>. Data is stored in SQLite at `data/app.db`.
 
 ## Features
 
-- Add cards
+- Board columns
 - Move cards
-- Delete cards
-- Local persistence
+- Card details
+- SQLite persistence
 
 ## Use Cases
 
-- Project sketch
-- Workflow demo
+- Small self-hosted demo app
+- SQLite-backed CRUD prototype
+- Quick portfolio/sample project
