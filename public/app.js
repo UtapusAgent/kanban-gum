@@ -7,6 +7,7 @@ const columns = [
 ];
 
 let cards = [];
+let editingId = null;
 
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, (char) => ({
@@ -43,17 +44,16 @@ function cardsFor(status) {
 
 function render() {
   const total = cards.length;
+  const editing = cards.find((card) => card.id === editingId);
   $("#app").innerHTML = `
     <section class="panel">
       <form id="cardForm" class="card-form">
-        <input id="title" placeholder="Card title" required>
+        <input id="title" placeholder="Card title" required value="${escapeHtml(editing?.title || "")}">
         <select id="priority">
-          <option>Medium</option>
-          <option>High</option>
-          <option>Low</option>
+          ${["Medium", "High", "Low"].map((priority) => `<option ${editing?.meta?.priority === priority ? "selected" : ""}>${priority}</option>`).join("")}
         </select>
-        <textarea id="body" placeholder="Details, acceptance criteria, links..."></textarea>
-        <button>Add card</button>
+        <textarea id="body" placeholder="Details, acceptance criteria, links...">${escapeHtml(editing?.body || "")}</textarea>
+        <div class="row"><button>${editing ? "Save card" : "Add card"}</button>${editing ? `<button type="button" class="ghost" id="cancelEdit">Cancel</button>` : ""}</div>
       </form>
     </section>
     <section class="stats">
@@ -85,6 +85,7 @@ function renderCard(card) {
       <p>${escapeHtml(card.body || "")}</p>
       <div class="row">
         ${columns.map(([status, label]) => `<button class="ghost" onclick="moveCard(${card.id}, '${status}')">${label}</button>`).join("")}
+        <button class="ghost" onclick="editCard(${card.id})">Edit</button>
         <button class="danger" onclick="deleteCard(${card.id})">Delete</button>
       </div>
     </article>
@@ -92,7 +93,9 @@ function renderCard(card) {
 }
 
 function bindEvents() {
-  $("#cardForm").addEventListener("submit", addCard);
+  $("#cardForm").addEventListener("submit", saveCard);
+  const cancel = $("#cancelEdit");
+  if (cancel) cancel.addEventListener("click", () => { editingId = null; render(); });
   document.querySelectorAll(".kanban-card").forEach((card) => {
     card.addEventListener("dragstart", (event) => {
       event.dataTransfer.setData("text/plain", card.dataset.id);
@@ -112,18 +115,22 @@ function bindEvents() {
   });
 }
 
-async function addCard(event) {
+async function saveCard(event) {
   event.preventDefault();
-  await api("/api/items", {
-    method: "POST",
-    body: JSON.stringify({
-      title: $("#title").value.trim(),
-      body: $("#body").value.trim(),
-      status: "backlog",
-      meta: { priority: $("#priority").value },
-    }),
-  });
+  const payload = { title: $("#title").value.trim(), body: $("#body").value.trim(), status: "backlog", meta: { priority: $("#priority").value } };
+  if (editingId) {
+    const old = cards.find((card) => card.id === editingId);
+    await api(`/api/items/${editingId}`, { method: "PUT", body: JSON.stringify({ ...old, ...payload, status: old.status, id: editingId }) });
+    editingId = null;
+  } else {
+    await api("/api/items", { method: "POST", body: JSON.stringify(payload) });
+  }
   await loadCards();
+}
+
+function editCard(id) {
+  editingId = id;
+  render();
 }
 
 async function moveCard(id, status) {
@@ -160,5 +167,6 @@ document.body.innerHTML = `
 `;
 
 loadCards();
+window.editCard = editCard;
 window.moveCard = moveCard;
 window.deleteCard = deleteCard;
